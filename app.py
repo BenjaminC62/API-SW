@@ -28,10 +28,37 @@ def get_monster_details(monster_url):
     else:
         details['type'] = 'Unknown'
 
+    # Recherche des balises <a> qui contiennent des liens vers les images
+    image_tags = [tag for tag in soup.find_all('a', {'class': 'image'}) if 'href' in tag.attrs]
+
+    # On s'assure de ne pas prendre les images d'élément comme "Fire", "Water", etc.
+    non_eveille_image = None
+    eveille_image = None
+
+    for tag in image_tags:
+        image_url = tag['href']
+
+        if image_url.startswith('/'):
+            image_url = 'https://summonerswar.fandom.com' + image_url
+
+        if 'Icon' in image_url and 'Element' not in image_url:
+            if not non_eveille_image:
+                non_eveille_image = image_url
+            elif not eveille_image:
+                eveille_image = image_url
+
+    details['image_url_non_eveille'] = non_eveille_image
+    details['image_url_eveille'] = eveille_image if eveille_image else None
+
+    print(f"Image URL non éveillé: {details['image_url_non_eveille']}")
+    if eveille_image:
+        print(f"Image URL éveillé: {details['image_url_eveille']}")
+    else:
+        print("Pas d'image éveillée disponible")
+
     return details
 
 
-# La requête pour scrapper la page
 response = requests.get(URL)
 soup = BeautifulSoup(response.content, 'html.parser')
 
