@@ -1,5 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
 
 BASE_URL = "https://summonerswar.fandom.com"
 
@@ -20,12 +23,10 @@ for row in soup.select('table tr'):
     if link_tag and img_tag:
         name = link_tag['title']
         details_url = BASE_URL + link_tag['href']
-        img_url = img_tag['src']
 
         monsters.append({
             "name": name,
             "details_url": details_url,
-            "image_url": img_url
         })
 
 # Afficher les résultats
@@ -34,3 +35,10 @@ for monster in monsters:
 
 print(len(monsters))
 
+@app.route('/api/monsters', methods=['GET'])
+def get_monster_list():
+    return jsonify(monsters)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
